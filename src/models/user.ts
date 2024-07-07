@@ -9,10 +9,16 @@ const userSchema = new mongoose.Schema({
           type: String,
           required: true,
      },
-     name: {
-          type: String,
-     }
+    name: {
+  type: String,
+  unique: true,
+  sparse: true // This allows null values
+},
+
+links: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Link' }], // Array of link IDs as ObjectIds
+
 });
 
 const User = mongoose.model("User", userSchema);
+
 export default User;

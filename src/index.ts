@@ -4,6 +4,7 @@ import "dotenv/config";
 import cors from "cors";
 import mongoose from "mongoose";
 import myUserRoute from "./routes/MyUserRoute";
+import MyLinksRoute from './routes/MyLinksRoute';
 
 
 //evn variable 
@@ -29,6 +30,9 @@ app.get("/health", async (req: Request, res: Response) => {
 
 
 app.use("/api/my/user", myUserRoute)
+
+app.use("/api/my-links", MyLinksRoute)
+
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
