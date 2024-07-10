@@ -1,10 +1,14 @@
 
 
 import { Request, Response } from "express";
+import cloudinary from "cloudinary";
 
 
 import User from '../models/user'
 import { error } from "console";
+
+
+
 
 const createCurrentUser = async (req: Request, res: Response) => {
   try {
@@ -43,28 +47,34 @@ const getCurrentUser = async (req: Request, res: Response) => {
 
 const updateCurrentUser = async (req: Request, res: Response) => {
   try {
-    const username = req.body.username.trim();
-    console.log('Received username:', username);
-    console.log('User ID:', req.userId);
-   
+    const { username } = req.body;
+    const { file } = req; // Multer middleware will populate this if there's a file
+
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-   
+
     // Check if the username already exists
-    const existingUser = await User.findOne({ name: username });
-    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
-      return res.status(400).json({ message: "Username already exists" });
+    if (username) {
+      const existingUser = await User.findOne({ name: username.trim() });
+      if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      user.name = username.trim();
     }
-   
-    // Update the user
-    user.name = username;
+
+    // Upload image to Cloudinary if there's a file
+    if (file) {
+      const imageUrl =  await uploadImage(req.file as Express.Multer.File);
+      user.avatar = imageUrl;
+    }
+
     await user.save();
     res.send(user);
   } catch (error: unknown) {
     console.error("Error updating user:", error);
-    
+
     if (error instanceof Error) {
       if ('code' in error && error.code === 11000) {
         // This is a MongoDB duplicate key error
@@ -76,6 +86,16 @@ const updateCurrentUser = async (req: Request, res: Response) => {
       res.status(500).json({ message: "An unknown error occurred" });
     }
   }
+};
+
+
+const uploadImage = async (file: Express.Multer.File) => {
+  const image = file;
+  const base64Image = Buffer.from(image.buffer).toString("base64");
+  const dataURI = `data:${image.mimetype};base64,${base64Image}`;
+
+  const uploadResponse = await cloudinary.v2.uploader.upload(dataURI);
+  return uploadResponse.url;
 };
 export default {
  

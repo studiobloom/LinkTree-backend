@@ -5,6 +5,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import myUserRoute from "./routes/MyUserRoute";
 import MyLinksRoute from './routes/MyLinksRoute';
+import { v2 as cloudinary } from "cloudinary";
 
 
 //evn variable 
@@ -13,6 +14,14 @@ import MyLinksRoute from './routes/MyLinksRoute';
 mongoose
   .connect(process.env.MONGODB_CONNECTION_STRING as string)
   .then(() => console.log("Connected to database!"));
+
+
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  
 
 const app: Express = express();
 const port = process.env.PORT;
