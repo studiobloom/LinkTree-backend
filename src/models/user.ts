@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
           
      },
 
-     avatar :{
+     avater :{
           type:String,
           required: false,
      },

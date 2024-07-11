@@ -67,7 +67,7 @@ const updateCurrentUser = async (req: Request, res: Response) => {
     // Upload image to Cloudinary if there's a file
     if (file) {
       const imageUrl =  await uploadImage(req.file as Express.Multer.File);
-      user.avatar = imageUrl;
+      user.avater = imageUrl;
     }
 
     await user.save();
