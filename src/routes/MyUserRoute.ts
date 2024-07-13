@@ -32,5 +32,7 @@ router.put(
    
 
 
+   router.get("/:username", MyUserController.getUserByUsername);
+
 
 export default router;

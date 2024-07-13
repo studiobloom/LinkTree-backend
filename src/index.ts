@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import myUserRoute from "./routes/MyUserRoute";
 import MyLinksRoute from './routes/MyLinksRoute';
 import { v2 as cloudinary } from "cloudinary";
-
+import bodyParser from 'body-parser';
 
 //evn variable 
 
@@ -26,7 +26,7 @@ mongoose
 const app: Express = express();
 const port = process.env.PORT;
 
-
+app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
 

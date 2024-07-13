@@ -46,10 +46,11 @@ const getCurrentUser = async (req: Request, res: Response) => {
 
 
 const updateCurrentUser = async (req: Request, res: Response) => {
-  try {
-    const { username } = req.body;
-    const { file } = req; // Multer middleware will populate this if there's a file
 
+  console.log("Received request body:", req.body);
+  try {
+    const { username, bio } = req.body;
+    const { file } = req; // Multer middleware will populate this if there's a file
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -64,9 +65,21 @@ const updateCurrentUser = async (req: Request, res: Response) => {
       user.name = username.trim();
     }
 
+    // Update bio if provided
+    if (bio !== undefined) {
+      // Validate bio
+      if (bio.length > 160) {
+        return res.status(400).json({ message: "Bio must be 160 characters or less" });
+      }
+      if (!/^[a-zA-Z0-9 ,.!?'"-]*$/.test(bio)) {
+        return res.status(400).json({ message: "Bio contains invalid characters" });
+      }
+      user.bio = bio.trim();
+    }
+
     // Upload image to Cloudinary if there's a file
     if (file) {
-      const imageUrl =  await uploadImage(req.file as Express.Multer.File);
+      const imageUrl = await uploadImage(req.file as Express.Multer.File);
       user.avater = imageUrl;
     }
 
@@ -74,7 +87,6 @@ const updateCurrentUser = async (req: Request, res: Response) => {
     res.send(user);
   } catch (error: unknown) {
     console.error("Error updating user:", error);
-
     if (error instanceof Error) {
       if ('code' in error && error.code === 11000) {
         // This is a MongoDB duplicate key error
@@ -97,9 +109,31 @@ const uploadImage = async (file: Express.Multer.File) => {
   const uploadResponse = await cloudinary.v2.uploader.upload(dataURI);
   return uploadResponse.url;
 };
+
+
+const getUserByUsername = async (req: Request, res: Response) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ name: username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Only send public information
+    const publicUserInfo = {
+      name: user.name,
+      avater: user.avater,
+      bio: user.bio
+    };
+    res.json(publicUserInfo);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 export default {
- 
   createCurrentUser,
   getCurrentUser,
-  updateCurrentUser
+  updateCurrentUser,
+  getUserByUsername  // Add this new method
 };
