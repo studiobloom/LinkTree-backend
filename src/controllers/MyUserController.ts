@@ -71,9 +71,7 @@ const updateCurrentUser = async (req: Request, res: Response) => {
       if (bio.length > 160) {
         return res.status(400).json({ message: "Bio must be 160 characters or less" });
       }
-      if (!/^[a-zA-Z0-9 ,.!?'"-]*$/.test(bio)) {
-        return res.status(400).json({ message: "Bio contains invalid characters" });
-      }
+      
       user.bio = bio.trim();
     }
 
